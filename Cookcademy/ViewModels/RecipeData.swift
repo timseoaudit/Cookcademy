@@ -1,18 +1,9 @@
-//
-//  RecipeData.swift
-//  Cookcademy
-//
-//  Created by Ben Stone on 4/19/21.
-//
 
 import Foundation
 
 class RecipeData: ObservableObject {
     @Published var recipes = Recipe.testRecipes
     
-    var favoriteRecipes: [Recipe] {
-        recipes.filter {$0.isFavorite}
-    }
     
     func recipes(for category: MainInformation.Category) -> [Recipe] {
         var filteredRecipes = [Recipe]()
@@ -23,6 +14,12 @@ class RecipeData: ObservableObject {
         }
         return filteredRecipes
     }
+    
+    var favoriteRecipes: [Recipe] {
+        recipes.filter {$0.isFavorite}
+    }
+    
+
     
     func add(recipe: Recipe) {
         if recipe.isValid {

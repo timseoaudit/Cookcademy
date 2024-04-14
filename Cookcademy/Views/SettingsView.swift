@@ -1,9 +1,4 @@
-//
-//  SettingdView.swift
-//  Cookcademy
-//
-//  Created by Tim P. on 14/04/2024.
-//
+
 
 import SwiftUI
 

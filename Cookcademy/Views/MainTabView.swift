@@ -1,9 +1,3 @@
-//
-//  MainTabView.swift
-//  Cookcademy
-//
-//  Created by user on 13/04/2024.
-//
 
 import SwiftUI
 

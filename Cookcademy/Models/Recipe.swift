@@ -1,13 +1,8 @@
-//
-//  Recipe.swift
-//  Cookcademy
-//
-//  Created by Ben Stone on 4/19/21.
-//
+
 
 import Foundation
 
-struct Recipe:Identifiable {
+struct Recipe: Identifiable {
     var id = UUID()
     var mainInformation: MainInformation
     var ingredients: [Ingredient]

@@ -1,9 +1,3 @@
-//
-//  ModifyIngredientView.swift
-//  Cookcademy
-//
-//  Created by Ben Stone on 4/19/21.
-//
 
 import SwiftUI
 

@@ -1,9 +1,3 @@
-//
-//  RecipeDetailView.swift
-//  RecipeTracker
-//
-//  Created by Ben Stone on 4/12/21.
-//
 
 import SwiftUI
 

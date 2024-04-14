@@ -31,8 +31,8 @@ protocol ModifyComponentView: View {
 struct ModifyComponentsView<Component: RecipeComponent, DestinationView: ModifyComponentView>: View where DestinationView.Component == Component{
     @Binding var components: [Component]
     
-    private let listBackgroundColor = AppColor.background
-    private let listTextColor = AppColor.foreground
+    @AppStorage("listBackgroundColor") private var listBackgroundColor = AppColor.background
+    @AppStorage("listTextColor") private var listTextColor = AppColor.foreground
 
     @State private var newComponent = Component()
     
@@ -83,13 +83,13 @@ struct ModifyComponentsView<Component: RecipeComponent, DestinationView: ModifyC
 
 struct ModifyIngredientsView_Previews: PreviewProvider {
     @State static var recipe = Recipe.testRecipes[1]
-    @State static var emptyIngredients = [Component]()
+    @State static var emptyIngredients = [Ingredient]()
     static var previews: some View {
         NavigationView {
-            ModifyComponentsView<Component, ModifyIngredientView>(components: $recipe.ingredients)
+            ModifyComponentsView<Ingredient, ModifyIngredientView>(components: $recipe.ingredients)
         }
         NavigationView {
-            ModifyComponentsView<Component, ModifyIngredientView>(components: $emptyIngredients)
+            ModifyComponentsView<Ingredient, ModifyIngredientView>(components: $emptyIngredients)
         }
     }
 }

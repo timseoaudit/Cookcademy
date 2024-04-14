@@ -10,13 +10,10 @@ import Foundation
 struct Recipe:Identifiable {
     var id = UUID()
     var mainInformation: MainInformation
-    var ingredients: [Component]
+    var ingredients: [Ingredient]
     var directions: [Direction]
     var isFavorite = false
     
-    var isValid: Bool {
-        mainInformation.isValid && !ingredients.isEmpty && !directions.isEmpty
-    }
 
     init() {
         self.init(mainInformation: MainInformation(name: "", description: "", author: "", category: .breakfast),
@@ -24,10 +21,19 @@ struct Recipe:Identifiable {
                   directions: [])
     }
     
-    init(mainInformation: MainInformation, ingredients:[Component], directions:[Direction]) {
+    init(mainInformation: MainInformation, ingredients:[Ingredient], directions:[Direction]) {
         self.mainInformation = mainInformation
         self.ingredients = ingredients
         self.directions = directions
+    }
+    var isValid: Bool {
+        mainInformation.isValid && !ingredients.isEmpty && !directions.isEmpty
+    }
+    
+    func index(of direction: Direction, excludingOptionalDirections: Bool) -> Int? {
+        let directions = directions.filter { excludingOptionalDirections ? !$0.isOptional : true }
+        let index = directions.firstIndex { $0.description == directions.description }
+        return index
     }
 }
 
@@ -49,6 +55,7 @@ struct MainInformation {
     }
 }
 
+
 struct Direction: RecipeComponent {
     var description: String
     var isOptional: Bool
@@ -63,10 +70,20 @@ struct Direction: RecipeComponent {
     }
 }
 
-struct Component: RecipeComponent {
+struct Ingredient: RecipeComponent {
     var name: String
     var quantity: Double
     var unit: Unit
+    
+    init(name: String, quantity: Double, unit: Unit) {
+        self.name = name
+        self.quantity = quantity
+        self.unit = unit
+    }
+    
+    init() {
+        self.init(name: "", quantity: 1.0, unit: .none)
+    }
         
     var description: String {
         let formattedQuantity = String(format: "%g", quantity)
@@ -81,16 +98,6 @@ struct Component: RecipeComponent {
                 return "\(formattedQuantity) \(unit.rawValue) \(name) "
             }
         }
-    }
-    
-    init(name: String, quantity: Double, unit: Unit) {
-        self.name = name
-        self.quantity = quantity
-        self.unit = unit
-    }
-    
-    init() {
-        self.init(name: "", quantity: 1.0, unit: .none)
     }
     
     enum Unit: String, CaseIterable {
@@ -112,10 +119,10 @@ extension Recipe {
                                                          author: "Josh",
                                                          category: .dinner),
                         ingredients: [
-                            Component(name: "Potatoes", quantity: 454, unit: .g),
-                            Component(name: "Butter", quantity: 1, unit: .tbs),
-                            Component(name: "Milk", quantity: 0.5, unit: .cups),
-                            Component(name: "Salt", quantity: 2, unit: .tsp)
+                            Ingredient(name: "Potatoes", quantity: 454, unit: .g),
+                            Ingredient(name: "Butter", quantity: 1, unit: .tbs),
+                            Ingredient(name: "Milk", quantity: 0.5, unit: .cups),
+                            Ingredient(name: "Salt", quantity: 2, unit: .tsp)
                         ],
                         directions:  [
                             Direction(description: "Put peeled potatoes in water and bring to boil ~15 min (once you can cut them easily)", isOptional: false),
@@ -129,13 +136,13 @@ extension Recipe {
                                                          author: "Deb Szajngarten",
                                                          category: .lunch),
                         ingredients: [
-                            Component(name: "Large beet", quantity: 3, unit: .none),
-                            Component(name: "Large apple", quantity: 2, unit: .none),
-                            Component(name: "Lemon zest", quantity: 0.5, unit: .tbs),
-                            Component(name: "Lemon juice", quantity: 1.5, unit: .tbs),
-                            Component(name: "Olive Oil", quantity: 1, unit: .tsp),
-                            Component(name: "Salt", quantity: 1, unit: .tsp),
-                            Component(name: "Pepper", quantity: 1, unit: .tsp)
+                            Ingredient(name: "Large beet", quantity: 3, unit: .none),
+                            Ingredient(name: "Large apple", quantity: 2, unit: .none),
+                            Ingredient(name: "Lemon zest", quantity: 0.5, unit: .tbs),
+                            Ingredient(name: "Lemon juice", quantity: 1.5, unit: .tbs),
+                            Ingredient(name: "Olive Oil", quantity: 1, unit: .tsp),
+                            Ingredient(name: "Salt", quantity: 1, unit: .tsp),
+                            Ingredient(name: "Pepper", quantity: 1, unit: .tsp)
                         ],
                         directions:  [
                             Direction(description: "Add beets to food safe plastic storage bags with apples, a teaspoon of course salt and a teaspoon of ground black pepper", isOptional: false),
@@ -152,19 +159,19 @@ extension Recipe {
                                                          author: "Deb Szajngarten",
                                                          category: .dinner),
                         ingredients: [
-                            Component(name: "Brisket", quantity: 1815, unit: .g),
-                            Component(name: "Large Red Onion", quantity: 1, unit: .none),
-                            Component(name: "Minced garlic clove", quantity: 6, unit: .none),
-                            Component(name: "Large Carrot", quantity: 1, unit: .none),
-                            Component(name: "Parsnip", quantity: 1, unit: .none),
-                            Component(name: "Celery Stalk", quantity: 3, unit: .none),
-                            Component(name: "Caul, Duck, or Chicken Fat", quantity: 3, unit: .tbs),
-                            Component(name: "Bay Leaf", quantity: 1, unit: .none),
-                            Component(name: "Apple Cider Vinegar", quantity: 0.3, unit: .cups),
-                            Component(name: "Red Wine", quantity: 1, unit: .cups),
-                            Component(name: "Small Can of Tomato Paste", quantity: 1, unit: .none),
-                            Component(name: "Spoonful of Honey", quantity: 1, unit: .none),
-                            Component(name: "Chicken Stock", quantity: 30, unit: .oz),
+                            Ingredient(name: "Brisket", quantity: 1815, unit: .g),
+                            Ingredient(name: "Large Red Onion", quantity: 1, unit: .none),
+                            Ingredient(name: "Minced garlic clove", quantity: 6, unit: .none),
+                            Ingredient(name: "Large Carrot", quantity: 1, unit: .none),
+                            Ingredient(name: "Parsnip", quantity: 1, unit: .none),
+                            Ingredient(name: "Celery Stalk", quantity: 3, unit: .none),
+                            Ingredient(name: "Caul, Duck, or Chicken Fat", quantity: 3, unit: .tbs),
+                            Ingredient(name: "Bay Leaf", quantity: 1, unit: .none),
+                            Ingredient(name: "Apple Cider Vinegar", quantity: 0.3, unit: .cups),
+                            Ingredient(name: "Red Wine", quantity: 1, unit: .cups),
+                            Ingredient(name: "Small Can of Tomato Paste", quantity: 1, unit: .none),
+                            Ingredient(name: "Spoonful of Honey", quantity: 1, unit: .none),
+                            Ingredient(name: "Chicken Stock", quantity: 30, unit: .oz),
                         ],
                         directions:  [
                             Direction(description: "In a small bowl, combine the honey, tomato paste and wine, and mix into paste", isOptional: false),
@@ -180,11 +187,11 @@ extension Recipe {
                                                          author: "Pam Broda",
                                                          category: .dessert),
                         ingredients: [
-                            Component(name: "Condensed Milk", quantity: 14, unit: .oz),
-                            Component(name: "Crushed Graham Crackers", quantity: 2.5, unit: .cups),
-                            Component(name: "Semi-Sweet Chocolate Chips", quantity: 12, unit: .oz),
-                            Component(name: "Vanilla Extract", quantity: 1, unit: .tsp),
-                            Component(name: "Milk", quantity: 2, unit: .tbs)
+                            Ingredient(name: "Condensed Milk", quantity: 14, unit: .oz),
+                            Ingredient(name: "Crushed Graham Crackers", quantity: 2.5, unit: .cups),
+                            Ingredient(name: "Semi-Sweet Chocolate Chips", quantity: 12, unit: .oz),
+                            Ingredient(name: "Vanilla Extract", quantity: 1, unit: .tsp),
+                            Ingredient(name: "Milk", quantity: 2, unit: .tbs)
                         ],
                         directions:  [
                             Direction(description: "Preheat oven to 350 degrees F", isOptional: false),
@@ -200,14 +207,14 @@ extension Recipe {
                                                          author: "Taylor Murray",
                                                          category: .breakfast),
                         ingredients: [
-                            Component(name: "Olive Oil", quantity: 3, unit: .tbs),
-                            Component(name: "Onion, finely chopped", quantity: 1, unit: .none),
-                            Component(name: "Large Egg", quantity: 8, unit: .none),
-                            Component(name: "Kosher Salt", quantity: 1, unit: .none),
-                            Component(name: "Unsalted Butter", quantity: 2, unit: .tbs),
-                            Component(name: "Parmesan, finely grated", quantity: 1, unit: .oz),
-                            Component(name: "Fresh Lemon Juice", quantity: 2, unit: .tbs),
-                            Component(name: "Baby Spinach", quantity: 3, unit: .oz)
+                            Ingredient(name: "Olive Oil", quantity: 3, unit: .tbs),
+                            Ingredient(name: "Onion, finely chopped", quantity: 1, unit: .none),
+                            Ingredient(name: "Large Egg", quantity: 8, unit: .none),
+                            Ingredient(name: "Kosher Salt", quantity: 1, unit: .none),
+                            Ingredient(name: "Unsalted Butter", quantity: 2, unit: .tbs),
+                            Ingredient(name: "Parmesan, finely grated", quantity: 1, unit: .oz),
+                            Ingredient(name: "Fresh Lemon Juice", quantity: 2, unit: .tbs),
+                            Ingredient(name: "Baby Spinach", quantity: 3, unit: .oz)
                         ],
                         directions:  [
                             Direction(description: "Heat 1 tbsp olive oil in large non stick skillet on medium heat", isOptional: false),
@@ -226,20 +233,20 @@ extension Recipe {
                                                          author: "Makeinze Gore",
                                                          category: .lunch),
                         ingredients: [
-                            Component(name: "Chopped Onion", quantity: 1, unit: .none),
-                            Component(name: "Chopped Red Bell Pepper", quantity: 1, unit: .none),
-                            Component(name: "Peeled and finely chopped carrot", quantity: 1, unit: .none),
-                            Component(name: "Minced Garlic Cloves", quantity: 3, unit: .none),
-                            Component(name: "Finely Chopped Jalapeno", quantity: 1, unit: .none),
-                            Component(name: "Tomato Paste", quantity: 2, unit: .tbs),
-                            Component(name: "Can of Pinto Beans, Drained and Rinsed", quantity: 1, unit: .none),
-                            Component(name: "Can of Black Beans, Drained and Rinsed", quantity: 1, unit: .none),
-                            Component(name: "Can of Kidney Beans, Drained and Rinsed", quantity: 1, unit: .none),
-                            Component(name: "Can of Fire Roasted Tomatoes", quantity: 1, unit: .none),
-                            Component(name: "Vegetable Broth", quantity: 3, unit: .cups),
-                            Component(name: "Chili Powder", quantity: 2, unit: .tbs),
-                            Component(name: "Cumin", quantity: 1, unit: .tbs),
-                            Component(name: "Oregano", quantity: 2, unit: .tsp),
+                            Ingredient(name: "Chopped Onion", quantity: 1, unit: .none),
+                            Ingredient(name: "Chopped Red Bell Pepper", quantity: 1, unit: .none),
+                            Ingredient(name: "Peeled and finely chopped carrot", quantity: 1, unit: .none),
+                            Ingredient(name: "Minced Garlic Cloves", quantity: 3, unit: .none),
+                            Ingredient(name: "Finely Chopped Jalapeno", quantity: 1, unit: .none),
+                            Ingredient(name: "Tomato Paste", quantity: 2, unit: .tbs),
+                            Ingredient(name: "Can of Pinto Beans, Drained and Rinsed", quantity: 1, unit: .none),
+                            Ingredient(name: "Can of Black Beans, Drained and Rinsed", quantity: 1, unit: .none),
+                            Ingredient(name: "Can of Kidney Beans, Drained and Rinsed", quantity: 1, unit: .none),
+                            Ingredient(name: "Can of Fire Roasted Tomatoes", quantity: 1, unit: .none),
+                            Ingredient(name: "Vegetable Broth", quantity: 3, unit: .cups),
+                            Ingredient(name: "Chili Powder", quantity: 2, unit: .tbs),
+                            Ingredient(name: "Cumin", quantity: 1, unit: .tbs),
+                            Ingredient(name: "Oregano", quantity: 2, unit: .tsp),
                         ],
                         directions:  [
                             Direction(description: "In a large pot over medium heat, heat olive oil then add onions, bell peppers and carrots", isOptional: false),
@@ -257,15 +264,15 @@ extension Recipe {
                                                          author: "Sarah Taller",
                                                          category: .dinner),
                         ingredients: [
-                            Component(name: "Linguini", quantity: 12, unit: .oz),
-                            Component(name: "Large shrimp, peeled", quantity: 20, unit: .oz),
-                            Component(name: "Extra-virgin olive oil", quantity: 0.33, unit: .cups),
-                            Component(name: "Minced garlic clove", quantity: 5, unit: .none),
-                            Component(name: "Red pepper flakes", quantity: 0.5, unit: .tsp),
-                            Component(name: "White Wine", quantity: 0.3, unit: .cups),
-                            Component(name: "Lemon", quantity: 3, unit: .none),
-                            Component(name: "Unsalted butter, cut into pieces", quantity: 4, unit: .tbs),
-                            Component(name: "Finely Chopped Fresh Parsley", quantity: 0.25, unit: .cups)
+                            Ingredient(name: "Linguini", quantity: 12, unit: .oz),
+                            Ingredient(name: "Large shrimp, peeled", quantity: 20, unit: .oz),
+                            Ingredient(name: "Extra-virgin olive oil", quantity: 0.33, unit: .cups),
+                            Ingredient(name: "Minced garlic clove", quantity: 5, unit: .none),
+                            Ingredient(name: "Red pepper flakes", quantity: 0.5, unit: .tsp),
+                            Ingredient(name: "White Wine", quantity: 0.3, unit: .cups),
+                            Ingredient(name: "Lemon", quantity: 3, unit: .none),
+                            Ingredient(name: "Unsalted butter, cut into pieces", quantity: 4, unit: .tbs),
+                            Ingredient(name: "Finely Chopped Fresh Parsley", quantity: 0.25, unit: .cups)
                         ],
                         directions:  [
                             Direction(description: "Bring large pot of salt water to a boil", isOptional: false),
@@ -287,12 +294,12 @@ extension Recipe {
                                                          author: "Jack B",
                                                          category: .dessert),
                         ingredients: [
-                            Component(name: "Caramel Candies", quantity: 14, unit: .oz),
-                            Component(name: "Water", quantity: 3, unit: .tbs),
-                            Component(name: "Chopped Pecans", quantity: 1.25, unit: .cups),
-                            Component(name: "Rice Krispies", quantity: 1, unit: .cups),
-                            Component(name: "Milk Chocolate Chips", quantity: 3, unit: .cups),
-                            Component(name: "Shortening", quantity: 1.25, unit: .tsp)
+                            Ingredient(name: "Caramel Candies", quantity: 14, unit: .oz),
+                            Ingredient(name: "Water", quantity: 3, unit: .tbs),
+                            Ingredient(name: "Chopped Pecans", quantity: 1.25, unit: .cups),
+                            Ingredient(name: "Rice Krispies", quantity: 1, unit: .cups),
+                            Ingredient(name: "Milk Chocolate Chips", quantity: 3, unit: .cups),
+                            Ingredient(name: "Shortening", quantity: 1.25, unit: .tsp)
                         ],
                         directions:  [
                             Direction(description: "Line 2 baking sheets with waxed paper", isOptional: false),
@@ -314,16 +321,16 @@ extension Recipe {
                                                          author: "Travis B",
                                                          category: .dinner),
                         ingredients: [
-                            Component(name: "Elbow Macaroni", quantity: 12, unit: .oz),
-                            Component(name: "Butter", quantity: 2, unit: .tbs),
-                            Component(name: "Small chopped onion", quantity: 1, unit: .none),
-                            Component(name: "Milk", quantity: 4, unit: .cups),
-                            Component(name: "Flour", quantity: 0.3, unit: .cups),
-                            Component(name: "Bay Leaf", quantity: 1, unit: .none),
-                            Component(name: "Thyme", quantity: 0.5, unit: .tsp),
-                            Component(name: "Pepper", quantity: 1, unit: .tsp),
-                            Component(name: "Salt", quantity: 1, unit: .tsp),
-                            Component(name: "Shredded Sharp Cheddar", quantity: 1, unit: .cups)
+                            Ingredient(name: "Elbow Macaroni", quantity: 12, unit: .oz),
+                            Ingredient(name: "Butter", quantity: 2, unit: .tbs),
+                            Ingredient(name: "Small chopped onion", quantity: 1, unit: .none),
+                            Ingredient(name: "Milk", quantity: 4, unit: .cups),
+                            Ingredient(name: "Flour", quantity: 0.3, unit: .cups),
+                            Ingredient(name: "Bay Leaf", quantity: 1, unit: .none),
+                            Ingredient(name: "Thyme", quantity: 0.5, unit: .tsp),
+                            Ingredient(name: "Pepper", quantity: 1, unit: .tsp),
+                            Ingredient(name: "Salt", quantity: 1, unit: .tsp),
+                            Ingredient(name: "Shredded Sharp Cheddar", quantity: 1, unit: .cups)
                         ],
                         directions:  [
                             Direction(description: "Heat oven to 375. Lightly coat 13 x 9 baking dish with vegetable cooking spray.", isOptional: false),
@@ -342,17 +349,17 @@ extension Recipe {
                                                          author: "Travis B",
                                                          category: .dinner),
                         ingredients: [
-                            Component(name: "Diced Yellow Onion", quantity: 1, unit: .none),
-                            Component(name: "Minced Garlic Clove", quantity: 4, unit: .none),
-                            Component(name: "Diced Celery Stalk", quantity: 1, unit: .none),
-                            Component(name: "Shredded Carrots", quantity: 1, unit: .cups),
-                            Component(name: "Broccolli florets", quantity: 1, unit: .cups),
-                            Component(name: "Cubed Zucchini", quantity: 1, unit: .none),
-                            Component(name: "Spinach", quantity: 3, unit: .cups),
-                            Component(name: "Peeled and Cubed Potato", quantity: 1, unit: .none),
-                            Component(name: "Can of Kidney Beans", quantity: 1, unit: .none),
-                            Component(name: "Box of Vegetable Stock", quantity: 1, unit: .none),
-                            Component(name: "Can of Diced Tomatoes", quantity: 1, unit: .none)
+                            Ingredient(name: "Diced Yellow Onion", quantity: 1, unit: .none),
+                            Ingredient(name: "Minced Garlic Clove", quantity: 4, unit: .none),
+                            Ingredient(name: "Diced Celery Stalk", quantity: 1, unit: .none),
+                            Ingredient(name: "Shredded Carrots", quantity: 1, unit: .cups),
+                            Ingredient(name: "Broccolli florets", quantity: 1, unit: .cups),
+                            Ingredient(name: "Cubed Zucchini", quantity: 1, unit: .none),
+                            Ingredient(name: "Spinach", quantity: 3, unit: .cups),
+                            Ingredient(name: "Peeled and Cubed Potato", quantity: 1, unit: .none),
+                            Ingredient(name: "Can of Kidney Beans", quantity: 1, unit: .none),
+                            Ingredient(name: "Box of Vegetable Stock", quantity: 1, unit: .none),
+                            Ingredient(name: "Can of Diced Tomatoes", quantity: 1, unit: .none)
                         ],
                         directions:  [
                             Direction(description: "Cook onion and garlic on high heat until onion is translucent, about 5 min", isOptional: false),
@@ -367,11 +374,11 @@ extension Recipe {
                                                          author: "Henry Minden",
                                                          category: .dinner),
                         ingredients: [
-                            Component(name: "Canned Clams", quantity: 40, unit: .oz),
-                            Component(name: "Garlic Clove", quantity: 8, unit: .none),
-                            Component(name: "Onion", quantity: 1, unit: .none),
-                            Component(name: "White Wine", quantity: 2, unit: .tbs),
-                            Component(name: "Butter", quantity: 4, unit: .tbs)
+                            Ingredient(name: "Canned Clams", quantity: 40, unit: .oz),
+                            Ingredient(name: "Garlic Clove", quantity: 8, unit: .none),
+                            Ingredient(name: "Onion", quantity: 1, unit: .none),
+                            Ingredient(name: "White Wine", quantity: 2, unit: .tbs),
+                            Ingredient(name: "Butter", quantity: 4, unit: .tbs)
                         ],
                         directions:  [
                             Direction(description: "Chop garlic and onions", isOptional: false),
@@ -387,9 +394,9 @@ extension Recipe {
                                                          author: "Ben",
                                                          category: .breakfast),
                         ingredients: [
-                            Component(name: "Granola", quantity: 0.5, unit: .cups),
-                            Component(name: "Banana", quantity: 1, unit: .none),
-                            Component(name: "Peanut Butter", quantity: 2, unit: .tbs),
+                            Ingredient(name: "Granola", quantity: 0.5, unit: .cups),
+                            Ingredient(name: "Banana", quantity: 1, unit: .none),
+                            Ingredient(name: "Peanut Butter", quantity: 2, unit: .tbs),
                          ],
                         directions:  [
                             Direction(description: "Slice the banana", isOptional: false),
@@ -402,14 +409,14 @@ extension Recipe {
                                                          author: "Lisbeth",
                                                          category: .dessert),
                         ingredients: [
-                            Component(name: "Ripe banana", quantity: 3, unit: .none),
-                            Component(name: "Sugar", quantity: 1, unit: .cups),
-                            Component(name: "Egg", quantity: 1, unit: .none),
-                            Component(name: "Flour", quantity: 1.5, unit: .cups),
-                            Component(name: "Melted Butter", quantity: 0.25, unit: .cups),
-                            Component(name: "Baking Soda", quantity: 1, unit: .tsp),
-                            Component(name: "Salt", quantity: 1, unit: .tsp),
-                            Component(name: "Chocolate Chips", quantity: 1, unit: .cups)
+                            Ingredient(name: "Ripe banana", quantity: 3, unit: .none),
+                            Ingredient(name: "Sugar", quantity: 1, unit: .cups),
+                            Ingredient(name: "Egg", quantity: 1, unit: .none),
+                            Ingredient(name: "Flour", quantity: 1.5, unit: .cups),
+                            Ingredient(name: "Melted Butter", quantity: 0.25, unit: .cups),
+                            Ingredient(name: "Baking Soda", quantity: 1, unit: .tsp),
+                            Ingredient(name: "Salt", quantity: 1, unit: .tsp),
+                            Ingredient(name: "Chocolate Chips", quantity: 1, unit: .cups)
                         ],
                         directions:  [
                             Direction(description: "Preheat oven to 325", isOptional: false),

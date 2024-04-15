@@ -19,7 +19,9 @@ struct MainTabView: View {
                 
         }
         .environmentObject(recipeData)
-        
+        .onAppear(perform: {
+            recipeData.loadRecipes()
+        })
     }
 }
 
